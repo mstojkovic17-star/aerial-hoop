@@ -25,7 +25,7 @@ JWT_DAYS = 30
 client = AsyncIOMotorClient(MONGO_URL or "mongodb://localhost:27017", serverSelectionTimeoutMS=8000)
 db = client[DB_NAME]
 
-app = FastAPI(title="Aerial Hoop")
+   app = FastAPI()
 api = APIRouter(prefix="/api")
 
 TRAINING_WEEKDAYS = (1, 3)  # Tuesday, Thursday
