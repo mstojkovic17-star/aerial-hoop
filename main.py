@@ -275,7 +275,7 @@ app.include_router(api)
 
 # ---------- frontend ----------
 
-PUBLIC = Path(__file__).resolve().parent.parent / "public"
+ PUBLIC = Path(__file__).resolve().parent / "static" / "public"
 
 
 @app.get("/")
