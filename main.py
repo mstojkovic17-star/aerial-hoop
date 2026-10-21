@@ -18,18 +18,15 @@ load_dotenv()
 
 MONGO_URL = os.environ.get("MONGO_URL", "")
 DB_NAME = os.environ.get("DB_NAME", "aerial_hoop")
-TRAINER_PIN = os.environ.get("TRAINER_PIN", "")  # lives ONLY in env / .env
+TRAINER_PIN = os.environ.get("TRAINER_PIN", "")
 JWT_SECRET = os.environ.get("JWT_SECRET", "")
 JWT_DAYS = 30
 
-# Never crash on import if env vars are missing; /api/health shows what is missing.
 client = AsyncIOMotorClient(MONGO_URL or "mongodb://localhost:27017", serverSelectionTimeoutMS=8000)
 db = client[DB_NAME]
 
 app = FastAPI(title="Aerial Hoop")
 api = APIRouter(prefix="/api")
-
-# ---------- helpers ----------
 
 TRAINING_WEEKDAYS = (1, 3)  # Tuesday, Thursday
 
@@ -95,14 +92,11 @@ async def require_trainer(authorization: Optional[str] = Header(None)) -> bool:
 def public_view(doc: dict, trainer: bool) -> dict:
     doc = {k: v for k, v in doc.items() if k != "_id"}
     if not trainer:
-        # Non-trainers never receive notes or attendance
         doc["note"] = ""
         doc["attended_dates"] = []
         doc["dont_know"] = False
     return doc
 
-
-# ---------- PIN rate limiting (5 wrong attempts / 5 minutes / IP) ----------
 
 _fails: dict[str, deque] = defaultdict(deque)
 WINDOW = 300
@@ -114,9 +108,6 @@ def client_ip(request: Request) -> str:
     if fwd:
         return fwd.split(",")[0].strip()
     return request.client.host if request.client else "unknown"
-
-
-# ---------- models ----------
 
 
 class PinIn(BaseModel):
@@ -143,12 +134,8 @@ class AttendanceIn(BaseModel):
     attended: bool
 
 
-# ---------- routes ----------
-
-
 @api.get("/health")
 async def health():
-    """Shows which settings are present (never their values) and whether MongoDB answers."""
     info = {
         "MONGO_URL": bool(MONGO_URL),
         "TRAINER_PIN": bool(TRAINER_PIN),
@@ -173,111 +160,4 @@ async def auth_pin(body: PinIn, request: Request):
     while q and now - q[0] > WINDOW:
         q.popleft()
     if len(q) >= MAX_FAILS:
-        raise HTTPException(429, "Previše pokušaja. Pokušaj ponovo za nekoliko minuta.")
-    if body.pin != TRAINER_PIN:
-        q.append(now)
-        raise HTTPException(401, "Pogrešan PIN")
-    q.clear()
-    return {"token": make_token()}
-
-
-@api.get("/signups")
-async def list_signups(month: str, trainer: bool = Depends(optional_trainer)):
-    valid_month(month)
-    docs = await db.signups.find({"month": month}).sort("created_at", 1).to_list(1000)
-    return [public_view(d, trainer) for d in docs]
-
-
-@api.get("/cancelled")
-async def list_cancelled(month: str):
-    valid_month(month)
-    docs = await db.cancelled.find({"date": {"$regex": f"^{month}"}}).to_list(100)
-    return [d["date"] for d in docs]
-
-
-@api.post("/signups")
-async def create_signup(body: SignupIn):
-    valid_month(body.month)
-    days = training_days(body.month)
-    half = body.half if body.plan == "half" else None
-    if body.plan == "half" and half is None:
-        raise HTTPException(400, "Izaberi koji deo meseca")
-    assigned: list[str] = []
-    if body.plan == "full":
-        assigned = days
-    elif half == "first":
-        assigned = days[:4]
-    elif half == "second":
-        assigned = days[-4:]
-    doc = {
-        "id": str(uuid.uuid4()),
-        "name": body.name.strip(),
-        "month": body.month,
-        "group": body.group,
-        "plan": body.plan,
-        "half": half,
-        "note": body.note.strip(),
-        "dont_know": body.dont_know,
-        "assigned_dates": assigned,
-        "excluded_dates": [],
-        "attended_dates": [],
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    }
-    await db.signups.insert_one(dict(doc))
-    return public_view(doc, False)
-
-
-@api.delete("/signups/{signup_id}")
-async def delete_signup(signup_id: str, _: bool = Depends(require_trainer)):
-    res = await db.signups.delete_one({"id": signup_id})
-    if res.deleted_count == 0:
-        raise HTTPException(404, "Prijava nije pronađena")
-    return {"ok": True}
-
-
-@api.post("/signups/{signup_id}/dates")
-async def edit_dates(signup_id: str, body: DateAction, _: bool = Depends(require_trainer)):
-    valid_date(body.date)
-    if body.action == "add":
-        upd = {"$addToSet": {"assigned_dates": body.date}, "$pull": {"excluded_dates": body.date}}
-    else:
-        upd = {"$addToSet": {"excluded_dates": body.date}, "$pull": {"assigned_dates": body.date}}
-    res = await db.signups.update_one({"id": signup_id}, upd)
-    if res.matched_count == 0:
-        raise HTTPException(404, "Prijava nije pronađena")
-    doc = await db.signups.find_one({"id": signup_id})
-    return public_view(doc, True)
-
-
-@api.post("/signups/{signup_id}/attendance")
-async def set_attendance(signup_id: str, body: AttendanceIn, _: bool = Depends(require_trainer)):
-    valid_date(body.date)
-    op = "$addToSet" if body.attended else "$pull"
-    res = await db.signups.update_one({"id": signup_id}, {op: {"attended_dates": body.date}})
-    if res.matched_count == 0:
-        raise HTTPException(404, "Prijava nije pronađena")
-    doc = await db.signups.find_one({"id": signup_id})
-    return public_view(doc, True)
-
-
-@api.post("/cancelled")
-async def cancel_class(body: DateAction, _: bool = Depends(require_trainer)):
-    """action=add cancels the class on that date; action=remove restores it."""
-    valid_date(body.date)
-    if body.action == "add":
-        await db.cancelled.update_one({"date": body.date}, {"$set": {"date": body.date}}, upsert=True)
-    else:
-        await db.cancelled.delete_one({"date": body.date})
-    return {"ok": True}
-
-
-app.include_router(api)
-
-# ---------- frontend ----------
-
- PUBLIC = Path(__file__).resolve().parent / "static" / "public"
-
-
-@app.get("/")
-async def index():
-    return FileResponse(PUBLIC / "index.html")
+        raise HTTPException(429,
