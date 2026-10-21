@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="sr-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#C48F8F">
+<title>Aerial Hoop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FDFBFB; --card:#F7F0F0; --pink:#F0DADA; --accent:#C48F8F; --text:#4A3C3C; --muted:#937A7A;
+  --radius:22px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;font-size:16px}
+button{font-family:inherit;color:inherit;border:none;background:none;cursor:pointer}
+h1,h2,h3{font-family:'Cormorant Garamond',serif;margin:0;font-weight:600}
+.app{max-width:520px;margin:0 auto;min-height:100vh;padding-bottom:110px;position:relative}
+
+/* header */
+.hero{position:relative;height:200px;border-radius:0 0 34px 34px;overflow:hidden;
+  background:url('https://images.pexels.com/photos/29515839/pexels-photo-29515839.jpeg?auto=compress&cs=tinysrgb&w=900') center 30%/cover, var(--accent)}
+.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(150,80,92,.55) 0%,rgba(120,60,75,.78) 100%)}
+.hero-in{position:relative;height:100%;padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between;color:#fff}
+.hero-top{display:flex;justify-content:space-between;align-items:center}
+.logo{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;font-size:1.2rem;opacity:.95}
+.icons{display:flex;gap:8px}
+.ibtn{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;color:#fff;backdrop-filter:blur(4px)}
+.ibtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hero h1{font-style:italic;font-size:2.6rem;line-height:1;color:#fff}
+.hero p{margin:6px 0 0;font-size:.9rem;opacity:.92}
+
+main{padding:18px 16px}
+
+/* calendar */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-head h2{font-size:1.6rem}
+.arrow{width:40px;height:40px;border-radius:50%;background:var(--card);font-size:1.2rem;color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.wd{text-align:center;font-size:.72rem;color:var(--muted);font-weight:700;padding-bottom:4px}
+.day{aspect-ratio:1/1.05;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.9rem;color:var(--muted)}
+.day.t{background:var(--pink);color:var(--text);font-weight:700;cursor:pointer}
+.day.t small{font-size:.66rem;font-weight:600;color:var(--accent);margin-top:2px;white-space:nowrap}
+.day.t.cx{opacity:.45;text-decoration:line-through}
+.day.t.cx small{text-decoration:none}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.stat{background:var(--card);border-radius:var(--radius);padding:14px 6px;text-align:center}
+.stat b{display:block;font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--accent);line-height:1}
+.stat span{font-size:.75rem;color:var(--muted)}
+
+h3.sec{font-size:1.4rem;margin:22px 0 10px}
+.list{display:flex;flex-direction:column;gap:8px}
+.row{background:var(--card);border-radius:18px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.row .grow{flex:1;min-width:0}
+.row .nm{font-weight:700}
+.row .sub{font-size:.8rem;color:var(--muted)}
+.row .note{font-size:.82rem;margin-top:4px;color:var(--text);background:var(--bg);border-radius:12px;padding:6px 10px;white-space:pre-wrap}
+.badge{font-size:.7rem;font-weight:700;background:var(--pink);color:var(--accent);border-radius:99px;padding:3px 10px}
+.empty{color:var(--muted);text-align:center;padding:18px;font-size:.9rem}
+.mini{width:34px;height:34px;border-radius:50%;background:var(--pink);color:var(--accent);font-size:1.2rem;font-weight:700;flex:none}
+.mini.del{font-size:.9rem}
+
+/* sticky button */
+.cta-wrap{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,rgba(253,251,251,0),var(--bg) 40%);z-index:20;pointer-events:none}
+.cta{pointer-events:auto;display:block;width:100%;max-width:488px;margin:0 auto}
+.pill{background:var(--accent);color:#fff;font-weight:700;border-radius:99px;padding:15px 22px;font-size:1rem;box-shadow:0 6px 18px rgba(196,143,143,.35)}
+.pill.soft{background:var(--pink);color:var(--accent);box-shadow:none}
+.pill:disabled{opacity:.5}
+
+/* sheets */
+.overlay{position:fixed;inset:0;background:rgba(74,60,60,.35);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.overlay.center{align-items:center;padding:20px}
+.sheet{background:var(--bg);width:100%;max-width:520px;border-radius:30px 30px 0 0;padding:18px 20px calc(24px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;animation:up .22s ease}
+.overlay.center .sheet{border-radius:28px;max-width:400px}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.sheet-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;min-height:40px}
+.sheet h2{font-size:1.7rem;margin:6px 0 16px;line-height:1.15}
+label.lb{font-size:.85rem;color:var(--muted);font-weight:700}
+input.tx,textarea.tx{width:100%;margin-top:8px;border:2px solid var(--pink);background:var(--card);border-radius:18px;padding:14px 16px;font:inherit;font-size:1rem;color:var(--text);outline:none}
+input.tx:focus,textarea.tx:focus{border-color:var(--accent)}
+textarea.tx{min-height:120px;resize:vertical}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{background:var(--card);border-radius:20px;padding:16px 18px;text-align:left;display:flex;flex-direction:column;gap:2px}
+.opt:active{background:var(--pink)}
+.opt b{font-size:1.05rem}
+.opt span{font-size:.85rem;color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.err{color:#B5656B;font-size:.85rem;margin-top:8px;min-height:1em}
+
+.bell{width:60px;height:60px;border-radius:50%;background:var(--pink);color:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.bell svg{width:30px;height:30px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pop{text-align:center}
+.pop small{color:var(--muted)}
+.pop h2{margin:6px 0 10px}
+.pop p{margin:0 0 18px;line-height:1.5}
+
+/* day view */
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border-radius:99px;padding:4px;margin-bottom:16px}
+.seg button{border-radius:99px;padding:10px 6px;font-size:.82rem;font-weight:700;color:var(--muted)}
+.seg button.on{background:var(--accent);color:#fff}
+.big{text-align:center;margin-bottom:14px}
+.big b{font-family:'Cormorant Garamond',serif;font-size:4rem;color:var(--accent);line-height:1;display:block}
+.big span{color:var(--muted);font-size:.9rem}
+.circ{width:30px;height:30px;border-radius:50%;border:2px solid var(--accent);flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem}
+.circ.on{background:var(--accent)}
+.came{text-align:center;font-weight:700;color:var(--accent);margin:-4px 0 12px}
+.sub-h{font-size:1.2rem;margin:20px 0 8px}
+
+/* attendance page */
+.page{position:fixed;inset:0;background:var(--bg);z-index:40;overflow:auto;padding:16px 16px 40px}
+.page-in{max-width:520px;margin:0 auto}
+.bar{height:8px;background:var(--pink);border-radius:99px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--text);color:#fff;padding:10px 20px;border-radius:99px;font-size:.9rem;z-index:99;opacity:0;pointer-events:none;transition:opacity .25s}
+.toast.show{opacity:.95}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div id="layer"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const MONTHS=['Januar','Februar','Mart','April','Maj','Jun','Jul','Avgust','Septembar','Oktobar','Novembar','Decembar'];
+const WD=['Pon','Uto','Sre','Čet','Pet','Sub','Ned'];
+const WD_FULL=['Nedelja','Ponedeljak','Utorak','Sreda','Četvrtak','Petak','Subota'];
+const GROUP_TIME={1:'16:50 - 17:50h',2:'17:50 - 18:50h'};
+const ICON={
+ lock:'<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+ unlock:'<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="3"/><path d="M8 11V8a4 4 0 0 1 7.5-1.8"/></svg>',
+ share:'<svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/></svg>',
+ chart:'<svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>',
+ bell:'<svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/></svg>'
+};
+
+const pad=n=>String(n).padStart(2,'0');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const monthKey=(y,m)=>`${y}-${pad(m+1)}`;
+const parseMonth=k=>{const [y,m]=k.split('-').map(Number);return {y,m:m-1}};
+const monthLabel=k=>{const {y,m}=parseMonth(k);return `${MONTHS[m]} ${y}`};
+const shiftMonth=(k,d)=>{const {y,m}=parseMonth(k);const dt=new Date(y,m+d,1);return monthKey(dt.getFullYear(),dt.getMonth())};
+const isoDate=(y,m,d)=>`${y}-${pad(m+1)}-${pad(d)}`;
+function fmtDate(iso){const [y,m,d]=iso.split('-').map(Number);return `${WD_FULL[new Date(y,m-1,d).getDay()]}, ${d}. ${MONTHS[m-1].toLowerCase()}`}
+function fmtShort(iso){const [,m,d]=iso.split('-').map(Number);return `${d}.${m}.`}
+function planLabel(s){
+  if(s.plan==='full')return 'Ceo mesec';
+  if(s.half==='first')return 'Pola meseca · prva polovina';
+  if(s.half==='second')return 'Pola meseca · druga polovina';
+  return 'Pola meseca · drugo';
+}
+const curMonthKey=()=>{const n=new Date();return monthKey(n.getFullYear(),n.getMonth())};
+
+/* ---------- state ---------- */
+let state={
+  month:curMonthKey(), signups:[], cancelled:[],
+  token:localStorage.getItem('trainer_token')||'',
+  day:null, dayGroup:1,
+  flow:null, pin:false, popup:null, att:null
+};
+const isTrainer=()=>!!state.token;
+
+/* ---------- api ---------- */
+async function api(path,opts={}){
+  const headers={'Content-Type':'application/json'};
+  if(state.token)headers.Authorization='Bearer '+state.token;
+  const res=await fetch('/api'+path,{...opts,headers});
+  let data=null;try{data=await res.json()}catch(e){}
+  if(res.status===401&&state.token&&path!=='/auth/pin'){logout(true)}
+  if(!res.ok)throw new Error((data&&data.detail)||'Greška. Pokušaj ponovo.');
+  return data;
+}
+async function loadMonth(){
+  try{
+    const [s,c]=await Promise.all([api('/signups?month='+state.month),api('/cancelled?month='+state.month)]);
+    state.signups=s;state.cancelled=c;
+  }catch(e){toast(e.message)}
+  renderAll();
+}
+function logout(silent){
+  state.token='';localStorage.removeItem('trainer_token');state.att=null;
+  if(!silent)toast('Odjavljena si');
+  loadMonth();
+}
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* ---------- derived ---------- */
+function trainingDates(k){
+  const {y,m}=parseMonth(k);const out=[];
+  const n=new Date(y,m+1,0).getDate();
+  for(let d=1;d<=n;d++){const w=new Date(y,m,d).getDay();if(w===2||w===4)out.push(isoDate(y,m,d))}
+  return out;
+}
+const attendeesOn=(date,group,list=state.signups)=>list.filter(s=>s.group===group&&s.assigned_dates.includes(date));
+
+/* ---------- render main ---------- */
+function renderAll(){renderApp();renderLayer()}
+
+function renderApp(){
+  const {y,m}=parseMonth(state.month);
+  const first=new Date(y,m,1).getDay();const offset=(first+6)%7;
+  const n=new Date(y,m+1,0).getDate();
+  const tdates=new Set(trainingDates(state.month));
+  let cells=WD.map(w=>`<div class="wd">${w}</div>`).join('');
+  for(let i=0;i<offset;i++)cells+='<div></div>';
+  for(let d=1;d<=n;d++){
+    const iso=isoDate(y,m,d);
+    if(tdates.has(iso)){
+      const cx=state.cancelled.includes(iso);
+      if(cx&&!isTrainer()){cells+=`<div class="day">${d}</div>`;continue}
+      const c1=attendeesOn(iso,1).length,c2=attendeesOn(iso,2).length;
+      cells+=`<button class="day t ${cx?'cx':''}" data-a="day" data-d="${iso}">${d}<small>${cx?'otkazano':c1+' · '+c2}</small></button>`;
+    }else cells+=`<div class="day">${d}</div>`;
+  }
+  const S=state.signups;
+  const full=S.filter(s=>s.plan==='full').length;
+  const halfN=S.filter(s=>s.plan==='half'&&s.half!=='other').length;
+  const other=S.filter(s=>s.plan==='half'&&s.half==='other').length;
+
+  const row=s=>`<div class="row"><div class="grow"><div class="nm">${esc(s.name)}</div><div class="sub">${s.group}. grupa · ${planLabel(s)}</div></div>
+    ${isTrainer()?`<button class="mini del" data-a="del" data-id="${s.id}" aria-label="Obriši">✕</button>`:''}</div>`;
+
+  let trainerBlock='';
+  if(isTrainer()){
+    const oth=S.filter(s=>s.plan==='half'&&s.half==='other');
+    trainerBlock=`<h3 class="sec">Drugo / Ne znam (${oth.length})</h3><div class="list">`+
+      (oth.length?oth.map(s=>`<div class="row"><div class="grow">
+        <div class="nm">${esc(s.name)} <span class="badge">${s.dont_know?'Ne znam':'Drugo'}</span></div>
+        <div class="sub">${s.group}. grupa${s.assigned_dates.length?' · datumi: '+[...s.assigned_dates].sort().map(fmtShort).join(', '):' · nema dodatih datuma'}</div>
+        ${s.note?`<div class="note">${esc(s.note)}</div>`:''}</div>
+        <button class="mini del" data-a="del" data-id="${s.id}" aria-label="Obriši">✕</button></div>`).join(''):'<div class="empty">Nema prijava</div>')+'</div>';
+  }
+
+  document.getElementById('app').innerHTML=`
+  <header class="hero"><div class="hero-in">
+    <div class="hero-top"><span class="logo">aerial hoop</span>
+      <div class="icons">
+        ${isTrainer()?`<button class="ibtn" data-a="att" aria-label="Prisustvo">${ICON.chart}</button>`:''}
+        <button class="ibtn" data-a="share" aria-label="Podeli">${ICON.share}</button>
+        <button class="ibtn" data-a="${isTrainer()?'logout':'pin'}" aria-label="Trenerica">${isTrainer()?ICON.unlock:ICON.lock}</button>
+      </div></div>
+    <div><h1>Aerial Hoop</h1><p>Raspored treninga · utorak &amp; četvrtak</p></div>
+  </div></header>
+  <main>
+    <div class="cal-head"><button class="arrow" data-a="prev" aria-label="Prethodni mesec">‹</button><h2>${monthLabel(state.month)}</h2><button class="arrow" data-a="next" aria-label="Sledeći mesec">›</button></div>
+    <div class="grid">${cells}</div>
+    <div class="stats">
+      <div class="stat"><b>${full}</b><span>Ceo mesec</span></div>
+      <div class="stat"><b>${halfN}</b><span>Pola meseca</span></div>
+      <div class="stat"><b>${other}</b><span>Drugo</span></div>
+    </div>
+    <h3 class="sec" style="margin-top:0">Sve prijave (${S.length})</h3>
+    <div class="list">${S.length?S.map(row).join(''):'<div class="empty">Još nema prijava za ovaj mesec</div>'}</div>
+    ${trainerBlock}
+  </main>
+  <div class="cta-wrap"><button class="pill cta" data-a="signup">Prijavi se · ${monthLabel(state.month)}</button></div>`;
+}
+
+/* ---------- layer (modals) ---------- */
+function renderLayer(){
+  const L=document.getElementById('layer');
+  let html='';
+  if(state.att)html+=attHTML();
+  if(state.day)html+=dayHTML();
+  if(state.flow)html+=flowHTML();
+  if(state.pin)html+=pinHTML();
+  if(state.popup)html+=popupHTML();
+  const keep=document.activeElement&&document.activeElement.id;
+  const val=keep?document.activeElement.value:null;
+  L.innerHTML=html;
+  if(keep){const el=document.getElementById(keep);if(el){el.focus();if(val!=null)el.value=val}}
+}
+
+function flowHTML(){
+  const f=state.flow;const st=f.step;
+  const back=`<button class="arrow" data-a="fback" aria-label="Nazad">‹</button>`;
+  const close=`<button class="arrow" data-a="fclose" aria-label="Zatvori">✕</button>`;
+  let body='';
+  if(st===1)body=`<label class="lb" for="f-name">Ime</label><input class="tx" id="f-name" placeholder="npr. Ana" maxlength="60" value="${esc(f.name)}" autocomplete="given-name">
+    <div class="err" id="f-err"></div><div class="stack"><button class="pill" data-a="fn1">Dalje</button></div>`;
+  if(st===2)body=`<h2>Označi svoj termin</h2><div class="opts">
+    <button class="opt" data-a="fgroup" data-g="1"><b>1. grupa</b><span>16:50 - 17:50h</span></button>
+    <button class="opt" data-a="fgroup" data-g="2"><b>2. grupa</b><span>17:50 - 18:50h</span></button></div>`;
+  if(st===3)body=`<h2>Koliko dolaziš?</h2><div class="opts">
+    <button class="opt" data-a="fplan" data-p="full"><b>Ceo mesec</b><span>8 treninga</span></button>
+    <button class="opt" data-a="fplan" data-p="half"><b>Pola meseca</b><span>4 treninga</span></button></div>`;
+  if(st===4)body=`<h2>Kada planiraš da budeš tu?</h2><div class="opts">
+    <button class="opt" data-a="fhalf" data-h="first"><b>Prva polovina meseca</b></button>
+    <button class="opt" data-a="fhalf" data-h="second"><b>Druga polovina meseca</b></button>
+    <button class="opt" data-a="fhalf" data-h="other"><b>Drugo</b></button></div>`;
+  if(st===5)body=`<h2>Molim te, objasni ili unesi datume ako znaš kada ćeš biti tu</h2>
+    <textarea class="tx" id="f-note" maxlength="1000">${esc(f.note)}</textarea>
+    <div class="stack"><button class="pill" data-a="fsend">Pošalji</button><button class="pill soft" data-a="fdont">Ne znam</button></div>`;
+  return `<div class="overlay" data-a="fclose-bg"><div class="sheet" role="dialog">
+    <div class="sheet-top">${back}${close}</div>${body}${f.error?`<div class="err">${esc(f.error)}</div>`:''}</div></div>`;
+}
+
+function pinHTML(){
+  return `<div class="overlay center" data-a="pclose-bg"><div class="sheet">
+    <div class="sheet-top"><span></span><button class="arrow" data-a="pclose" aria-label="Zatvori">✕</button></div>
+    <h2>Trenerica</h2>
+    <label class="lb" for="pin-in">PIN</label>
+    <input class="tx" id="pin-in" type="password" inputmode="numeric" autocomplete="off" maxlength="12">
+    <div class="err" id="pin-err">${esc(state.pinErr||'')}</div>
+    <div class="stack"><button class="pill" data-a="pinok">Potvrdi</button></div></div></div>`;
+}
+
+function popupHTML(){
+  return `<div class="overlay center"><div class="sheet pop">
+    <div class="bell">${ICON.bell}</div>
+    <small>Hvala, ${esc(state.popup.name)}! Prijava je sačuvana.</small>
+    <h2>Podsetnik za članarinu</h2>
+    <p>Članarinu za tekući mesec doneti ili uplatiti na račun do kraja prve nedelje u mesecu. Molim Vas da ne kasnimo. Hvala!</p>
+    <button class="pill" style="width:100%" data-a="pop-ok">U redu</button></div></div>`;
+}
+
+function dayHTML(){
+  const d=state.day,g=state.dayGroup;
+  const cx=state.cancelled.includes(d);
+  const list=attendeesOn(d,g).sort((a,b)=>a.name.localeCompare(b.name,'sr'));
+  const c1=attendeesOn(d,1).length,c2=attendeesOn(d,2).length;
+  const T=isTrainer();
+  const came=list.filter(s=>(s.attended_dates||[]).includes(d)).length;
+  const rows=list.map(s=>{
+    const on=(s.attended_dates||[]).includes(d);
+    return `<div class="row">
+      ${T?`<button class="circ ${on?'on':''}" data-a="tick" data-id="${s.id}" data-on="${on?1:0}" aria-label="Došla">${on?'✓':''}</button>`:''}
+      <div class="grow"><div class="nm">${esc(s.name)}</div><div class="sub">${planLabel(s)}</div>${T&&s.note?`<div class="note">${esc(s.note)}</div>`:''}</div>
+      ${T?`<button class="mini" data-a="rm" data-id="${s.id}" aria-label="Ukloni sa datuma">−</button>`:''}</div>`;
+  }).join('');
+  let extra='';
+  if(T){
+    const cand=state.signups.filter(s=>s.group===g&&s.plan==='half'&&s.half==='other'&&!s.assigned_dates.includes(d));
+    extra=`<h3 class="sub-h">Drugo / Ne znam</h3><div class="list">`+(cand.length?cand.map(s=>`<div class="row"><div class="grow">
+      <div class="nm">${esc(s.name)} <span class="badge">${s.dont_know?'Ne znam':'Drugo'}</span></div>
+      ${s.note?`<div class="note">${esc(s.note)}</div>`:''}</div>
+      <button class="mini" data-a="addd" data-id="${s.id}" aria-label="Dodaj na datum">+</button></div>`).join(''):'<div class="empty">Nema devojaka u ovoj sekciji</div>')+'</div>'+
+      `<div class="stack" style="margin-top:20px"><button class="pill soft" data-a="cancel" data-on="${cx?1:0}">${cx?'Vrati trening u kalendar':'Otkaži trening'}</button></div>`;
+  }
+  return `<div class="overlay" data-a="dclose-bg"><div class="sheet" role="dialog">
+    <div class="sheet-top"><h2 style="margin:0">${fmtDate(d)}</h2><button class="arrow" data-a="dclose" aria-label="Zatvori">✕</button></div>
+    ${cx?'<div class="empty">Ovaj trening je otkazan</div>':''}
+    <div class="seg"><button class="${g===1?'on':''}" data-a="dg" data-g="1">1. grupa · ${GROUP_TIME[1]} (${c1})</button><button class="${g===2?'on':''}" data-a="dg" data-g="2">2. grupa · ${GROUP_TIME[2]} (${c2})</button></div>
+    <div class="big"><b>${list.length}</b><span>devojaka dolazi</span></div>
+    ${T&&list.length?`<div class="came">Došlo: ${came}/${list.length}</div>`:''}
+    <div class="list">${rows||'<div class="empty">Nema prijavljenih za ovaj datum</div>'}</div>
+    ${extra}</div></div>`;
+}
+
+function attHTML(){
+  const a=state.att;
+  const eff=a.signups;
+  const rows=eff.map(s=>{
+    const planned=s.assigned_dates.filter(x=>!a.cancelled.includes(x)).length;
+    const did=(s.attended_dates||[]).filter(x=>!a.cancelled.includes(x)).length;
+    const pct=planned?Math.min(100,Math.round(did/planned*100)):0;
+    return `<div class="row" style="flex-direction:column;align-items:stretch;gap:0">
+      <div style="display:flex;justify-content:space-between"><span class="nm">${esc(s.name)}</span><b>${did}/${planned}</b></div>
+      <div class="bar"><i style="width:${pct}%"></i></div></div>`;
+  }).join('');
+  return `<div class="page"><div class="page-in">
+    <div class="sheet-top"><h2 style="margin:0">Prisustvo</h2><button class="arrow" data-a="aclose" aria-label="Zatvori">✕</button></div>
+    <div class="cal-head"><button class="arrow" data-a="aprev">‹</button><h2 style="font-size:1.4rem">${monthLabel(a.month)}</h2><button class="arrow" data-a="anext">›</button></div>
+    <div class="list">${rows||'<div class="empty">Nema prijava za ovaj mesec</div>'}</div></div></div>`;
+}
+
+/* ---------- actions ---------- */
+async function openAtt(month){
+  try{
+    const [s,c]=await Promise.all([api('/signups?month='+month),api('/cancelled?month='+month)]);
+    state.att={month,signups:s,cancelled:c};renderLayer();
+  }catch(e){toast(e.message)}
+}
+function openFlow(){state.flow={step:1,name:'',group:1,plan:'full',half:null,note:'',month:state.month,error:''};renderLayer();setTimeout(()=>{const i=document.getElementById('f-name');i&&i.focus()},60)}
+
+async function saveSignup(extra){
+  const f=state.flow;
+  const body={name:f.name,month:f.month,group:f.group,plan:f.plan,half:f.plan==='half'?f.half:null,note:'',dont_know:false,...extra};
+  try{
+    await api('/signups',{method:'POST',body:JSON.stringify(body)});
+    state.flow=null;state.popup={name:f.name};
+    if(f.month!==state.month)state.month=f.month;
+    await loadMonth();
+  }catch(e){f.error=e.message;renderLayer()}
+}
+
+document.addEventListener('click',async ev=>{
+  const el=ev.target.closest('[data-a]');if(!el)return;
+  const a=el.dataset.a;
+  // background clicks only close when the overlay itself is clicked
+  if(a.endsWith('-bg')&&ev.target!==el)return;
+  const f=state.flow;
+  switch(a){
+    case 'prev':state.month=shiftMonth(state.month,-1);return loadMonth();
+    case 'next':state.month=shiftMonth(state.month,1);return loadMonth();
+    case 'signup':return openFlow();
+    case 'share':return share();
+    case 'pin':state.pin=true;state.pinErr='';renderLayer();setTimeout(()=>{const i=document.getElementById('pin-in');i&&i.focus()},60);return;
+    case 'logout':return logout();
+    case 'pclose':case 'pclose-bg':state.pin=false;return renderLayer();
+    case 'pinok':return submitPin();
+    case 'pop-ok':state.popup=null;return renderLayer();
+    case 'fclose':case 'fclose-bg':state.flow=null;return renderLayer();
+    case 'fback':if(f.step===1){state.flow=null}else if(f.step===5){f.step=4}else if(f.step===4){f.step=3}else f.step--;f.error='';return renderLayer();
+    case 'fn1':{const v=document.getElementById('f-name').value.trim();if(!v){document.getElementById('f-err').textContent='Upiši svoje ime';return}f.name=v;f.step=2;return renderLayer()}
+    case 'fgroup':f.group=Number(el.dataset.g);f.step=3;return renderLayer();
+    case 'fplan':f.plan=el.dataset.p;if(f.plan==='full')return saveSignup({});f.step=4;return renderLayer();
+    case 'fhalf':f.half=el.dataset.h;if(f.half==='other'){f.step=5;return renderLayer()}return saveSignup({});
+    case 'fsend':{const note=document.getElementById('f-note').value.trim();f.note=note;return saveSignup({note})}
+    case 'fdont':return saveSignup({dont_know:true,note:''});
+    case 'day':state.day=el.dataset.d;state.dayGroup=state.dayGroup||1;return renderLayer();
+    case 'dclose':case 'dclose-bg':state.day=null;return renderLayer();
+    case 'dg':state.dayGroup=Number(el.dataset.g);return renderLayer();
+    case 'del':if(confirm('Obriši prijavu?')){try{await api('/signups/'+el.dataset.id,{method:'DELETE'});await loadMonth()}catch(e){toast(e.message)}}return;
+    case 'rm':try{await api(`/signups/${el.dataset.id}/dates`,{method:'POST',body:JSON.stringify({date:state.day,action:'remove'})});await loadMonth()}catch(e){toast(e.message)}return;
+    case 'addd':try{await api(`/signups/${el.dataset.id}/dates`,{method:'POST',body:JSON.stringify({date:state.day,action:'add'})});await loadMonth()}catch(e){toast(e.message)}return;
+    case 'tick':try{await api(`/signups/${el.dataset.id}/attendance`,{method:'POST',body:JSON.stringify({date:state.day,attended:el.dataset.on!=='1'})});await loadMonth()}catch(e){toast(e.message)}return;
+    case 'cancel':{
+      const restore=el.dataset.on==='1';
+      if(!restore&&!confirm('Otkaži trening?'))return;
+      try{await api('/cancelled',{method:'POST',body:JSON.stringify({date:state.day,action:restore?'remove':'add'})});state.day=null;await loadMonth()}catch(e){toast(e.message)}return}
+    case 'att':return openAtt(state.month);
+    case 'aclose':state.att=null;return renderLayer();
+    case 'aprev':return openAtt(shiftMonth(state.att.month,-1));
+    case 'anext':return openAtt(shiftMonth(state.att.month,1));
+  }
+});
+
+document.addEventListener('keydown',ev=>{
+  if(ev.key!=='Enter')return;
+  if(ev.target.id==='f-name'){ev.preventDefault();document.querySelector('[data-a="fn1"]').click()}
+  if(ev.target.id==='pin-in'){ev.preventDefault();submitPin()}
+});
+
+async function submitPin(){
+  const v=document.getElementById('pin-in').value;
+  try{
+    const r=await api('/auth/pin',{method:'POST',body:JSON.stringify({pin:v})});
+    state.token=r.token;localStorage.setItem('trainer_token',r.token);state.pin=false;
+    toast('Dobrodošla, trenerice!');await loadMonth();
+  }catch(e){state.pinErr=e.message;renderLayer()}
+}
+
+async function share(){
+  const link=`${location.origin}${location.pathname}?prijava=1&mesec=${state.month}`;
+  const text=`Prijavi se! ${link}`;
+  if(navigator.share){try{await navigator.share({text});return}catch(e){if(e.name==='AbortError')return}}
+  try{await navigator.clipboard.writeText(text)}
+  catch(e){const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove()}
+  toast('Link kopiran');
+}
+
+/* ---------- boot ---------- */
+(async function init(){
+  const p=new URLSearchParams(location.search);
+  const fromLink=p.get('prijava')==='1';
+  if(fromLink&&/^\d{4}-\d{2}$/.test(p.get('mesec')||''))state.month=p.get('mesec');
+  await loadMonth();
+  const seenKey='prijava_viewed_'+curMonthKey();
+  let auto=false;
+  if(fromLink)auto=true;
+  else{try{if(!localStorage.getItem(seenKey)){auto=true}}catch(e){}}
+  try{localStorage.setItem(seenKey,'1')}catch(e){}
+  if(auto){if(!fromLink)state.month=curMonthKey();openFlow()}
+  if(fromLink)history.replaceState(null,'',location.pathname);
+})();
+</script>
+</body>
+</html>
