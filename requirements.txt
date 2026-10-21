@@ -1,6 +1,5 @@
-fastapi
-uvicorn
-motor
-pydantic
-PyJWT
-python-dotenv
+fastapi>=0.115
+uvicorn[standard]>=0.30
+motor>=3.6
+PyJWT>=2.8
+python-dotenv>=1.0
